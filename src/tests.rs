@@ -1,21 +1,3 @@
-#[cfg(test)]
-mod xxh3_hashable_tests {
-    use crate::XXH3;
-
-    #[test]
-    fn test_0_ne() {
-        let u = 0u128;
-        let hash = u.xxh3();
-        assert_ne!(u, hash);
-    }
-
-    #[test]
-    fn test_1_ne() {
-        let u = 1u128;
-        let hash = u.xxh3();
-        assert_ne!(u, hash);
-    }
-}
 
 #[cfg(test)]
 mod new_rng_tests {
@@ -27,7 +9,7 @@ mod new_rng_tests {
         let u = 'π';
         let mut rarng = RandomAccessRNG::new(u);
         let value = rarng.next_u64();
-        assert_eq!(value, 8284857334634725328);
+        assert_eq!(value, 5080887248986460467);
     }
 
     #[test]
@@ -35,7 +17,7 @@ mod new_rng_tests {
         let u = 0xffffu16;
         let mut rarng = RandomAccessRNG::new(u);
         let value = rarng.next_u64();
-        assert_eq!(value, 9225551887033442823);
+        assert_eq!(value, 91599049468127248);
     }
 
     #[test]
@@ -43,7 +25,7 @@ mod new_rng_tests {
         let u = 0xffffffffu32;
         let mut rarng = RandomAccessRNG::new(u);
         let value = rarng.next_u64();
-        assert_eq!(value, 2450845663194698032);
+        assert_eq!(value, 10214697059907569025);
     }
 
     #[test]
@@ -51,7 +33,7 @@ mod new_rng_tests {
         let u = 0xffffffffffffffffu64;
         let mut rarng = RandomAccessRNG::new(u);
         let value = rarng.next_u64();
-        assert_eq!(value, 252690945009319174);
+        assert_eq!(value, 821603837758500535);
     }
 
     #[test]
@@ -59,23 +41,7 @@ mod new_rng_tests {
         let u = 0xffffffffffffffffffffffffffffffffu128;
         let mut rarng = RandomAccessRNG::new(u);
         let value = rarng.next_u64();
-        assert_eq!(value, 10781180276554971882);
-    }
-
-    #[test]
-    fn test_f32() {
-        let u = 1.29387420376023857f32;
-        let mut rarng = RandomAccessRNG::new(u);
-        let value = rarng.next_u64();
-        assert_eq!(value, 16941462650142886078);
-    }
-
-    #[test]
-    fn test_f64() {
-        let u = 1.29387420376023857f64;
-        let mut rarng = RandomAccessRNG::new(u);
-        let value = rarng.next_u64();
-        assert_eq!(value, 10321688837969058469);
+        assert_eq!(value, 11948003739489801998);
     }
 
     #[test]
@@ -83,7 +49,7 @@ mod new_rng_tests {
         let u = "hello world!";
         let mut rarng = RandomAccessRNG::new(u);
         let value = rarng.next_u64();
-        assert_eq!(value, 2180803427816266899);
+        assert_eq!(value, 3781495884637729362);
     }
 
     #[test]
@@ -91,7 +57,7 @@ mod new_rng_tests {
         let u = "";
         let mut rarng = RandomAccessRNG::new(u);
         let value = rarng.next_u64();
-        assert_eq!(value, 9094331554905357734);
+        assert_eq!(value, 8018728376013651415);
     }
 
     #[test]
@@ -99,7 +65,7 @@ mod new_rng_tests {
         let u: [u8; 4] = [0xff, 0x01, 0xba, 0xe4];
         let mut rarng = RandomAccessRNG::new(u.as_slice());
         let value = rarng.next_u64();
-        assert_eq!(value, 5612944908904660542);
+        assert_eq!(value, 14149283188203591743);
     }
 
     #[test]
@@ -107,7 +73,7 @@ mod new_rng_tests {
         let u = ["0xff", "0x01", "0xba", "0xe4", "hello", "world"];
         let mut rarng = RandomAccessRNG::new(u.as_slice());
         let value = rarng.next_u64();
-        assert_eq!(value, 18207671733807896077);
+        assert_eq!(value, 15426435159302312466);
     }
 
     #[test]
@@ -115,7 +81,7 @@ mod new_rng_tests {
         let u = [["hello", "world"], ["stuff", "things"]];
         let mut rarng = RandomAccessRNG::new(u.as_slice());
         let value = rarng.next_u64();
-        assert_eq!(value, 13214984778475501371);
+        assert_eq!(value, 9977935657722848223);
     }
 }
 
@@ -332,6 +298,79 @@ mod distribution_tests {
 }
 
 
+/// These tests relate more to the `Hash` macro than anything, but we include for completeness
+#[cfg(test)]
+mod difference_tests {
+    use crate::RandomAccessRNG;
+    use rand_core::RngCore;
+
+    #[test]
+    fn test_vector() {
+        let master_seed = 123456u64;
+
+        let v1 = vec![1, 2];
+        let v2 = vec![2, 1];
+
+        let parent = RandomAccessRNG::new(master_seed);
+
+        let mut child1 = parent.get(v1);
+        let mut child2 = parent.get(v2);
+
+        for _ in 0..1000 {
+            assert_ne!(child1.next_u64(), child2.next_u64());
+        }
+
+    }
+
+    #[test]
+    fn test_struct_ne() {
+
+        #[derive(Hash)]
+        struct Test(u64, u64);
+
+        let master_seed = 123456u64;
+
+        let v1 = Test(1, 2);
+        let v2 = Test(2, 1);
+
+        let parent = RandomAccessRNG::new(master_seed);
+
+        let mut child1 = parent.get(v1);
+        let mut child2 = parent.get(v2);
+
+        for _ in 0..1000 {
+            assert_ne!(child1.next_u64(), child2.next_u64());
+        }
+
+    }
+
+    #[test]
+    fn test_struct_eq() {
+
+        #[derive(Hash)]
+        struct Test1(u64, u64);
+        #[derive(Hash)]
+        struct Test2(u64, u64);
+
+        let master_seed = 123456u64;
+
+        let v1 = Test1(1, 2);
+        let v2 = Test2(1, 2);
+
+        let parent = RandomAccessRNG::new(master_seed);
+
+        let mut child1 = parent.get(v1);
+        let mut child2 = parent.get(v2);
+
+        for _ in 0..1000 {
+            assert_eq!(child1.next_u64(), child2.next_u64());
+        }
+
+    }
+
+
+}
+
 #[cfg(test)]
 mod path_tests {
     use crate::RandomAccessRNG;
@@ -436,5 +475,24 @@ mod path_tests {
         for _ in 0..1000 {
             assert_eq!(second.next_u64(), all.next_u64());
         }
+    }
+
+    #[test]
+    fn test_triple_path() {
+        let parent = RandomAccessRNG::new("root");
+
+        // Unix-style paths
+        let mut child1 = parent.path("world/enemy/color");
+
+        // Windows-style paths (forward slashes)
+        let mut child2 = parent.path("world\\enemy\\color");
+
+        // Paths with root directory are handled
+        let mut child3 = parent.path("/world/enemy/color"); // Same as "world/enemy"
+
+        let c2_64 = child2.next_u64();
+
+        assert_eq!(child1.next_u64(), c2_64);
+        assert_eq!(c2_64, child3.next_u64());
     }
 }

@@ -2,6 +2,14 @@
 name = "random_access_rng"
 version = "0.1.0"
 edition = "2024"
+description = "A deterministic random number generator with hierarchical seeding and random access capabilities"
+license = "MIT"
+repository = "https://github.com/yourusername/random_access_rng"
+documentation = "https://docs.rs/random_access_rng"
+readme = "README.md"
+keywords = ["random", "rng", "procedural", "generation", "deterministic", "xxhash", "hierarchical"]
+categories = ["algorithms", "simulation", "game-development"]
+authors = ["Your Name <your.email@example.com>"]
 
 [lib]
 name = "random_access_rng"
@@ -10,26 +18,7 @@ path = "src/lib.rs"
 [dependencies]
 rand_core = "0.9.3"
 xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
-xxh3_derive = { path = "./xxh3_derive" }
-xxh3_trait = { path = "./xxh3_trait" }
 
 [dev-dependencies]
-xxh3_derive = { path = "./xxh3_derive" }
+rand = "0.9.1"
 
-[features]
-default = ["derive"]
-derive = []
-
-[workspace]
-members = [".", "xxh3_derive", "xxh3_trait"]
-resolver = "2"
-
-[workspace.package]
-version = "0.1.0"
-edition = "2021"
-
-[workspace.dependencies]
-rand_core = "0.9.3"
-xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
-syn = "2.0"
-quote = "1.0"
