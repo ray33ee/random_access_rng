@@ -2,18 +2,14 @@
 name = "random_access_rng"
 version = "0.1.0"
 edition = "2024"
-description = "A deterministic random number generator with hierarchical seeding and random access capabilities"
+description = "A deterministic random number generator with hierarchical seeding and random access functionality"
 license = "MIT"
-repository = "https://github.com/yourusername/random_access_rng"
+license-file = "license"
+repository = "https://github.com/ray33ee/random_access_rng"
 documentation = "https://docs.rs/random_access_rng"
 readme = "README.md"
-keywords = ["random", "rng", "procedural", "generation", "deterministic", "xxhash", "hierarchical"]
+keywords = ["random", "rng", "deterministic", "xxhash", "hierarchical"]
 categories = ["algorithms", "simulation", "game-development"]
-authors = ["Your Name <your.email@example.com>"]
-
-[lib]
-name = "random_access_rng"
-path = "src/lib.rs"
 
 [dependencies]
 rand_core = "0.9.3"

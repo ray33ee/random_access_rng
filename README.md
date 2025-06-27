@@ -13,8 +13,8 @@ A fast, deterministic random number generator with hierarchical seeding and rand
 - **🎯 Deterministic**: Same seed always produces the same sequence
 - **🌳 Hierarchical**: Create child RNGs with different seeds
 - **📍 Random Access**: Jump to any position without generating intermediate values
-- **🛤️ Path-based**: Use file system-like paths to create RNG hierarchies
-- **🔧 Standard Compatible**: Implements `RngCore` and `SeedableRng` traits
+- **🛤️ Path-based**: Use paths to create RNG hierarchies
+- **🔧 Standard Compatible**: Implements [RngCore](https://docs.rs/rand/latest/rand/trait.RngCore.html) and [SeedableRng](https://docs.rs/rand/latest/rand/trait.SeedableRng.html) traits
 
 ## Quick Start
 
@@ -49,13 +49,14 @@ let path_rng = rng.path("level1/level2/level3");
 
 ```rust
 use random_access_rng::RandomAccessRNG;
+use rand::Rng;
 
 fn generate_terrain(world_seed: &str, x: i32, y: i32) -> f64 {
     let world = RandomAccessRNG::new(world_seed);
     let terrain = world.path(&format!("terrain/{}/{}", x, y));
     
     // Generate height value
-    let height = terrain.next_u64() as f64 / u64::MAX as f64;
+    let height = terrain.random::<f64>();
     height * 1000.0 // Scale to 0-1000 range
 }
 
@@ -64,38 +65,6 @@ let height1 = generate_terrain("world_seed", 10, 20);
 let height2 = generate_terrain("world_seed", 10, 20); // Same result
 let height3 = generate_terrain("world_seed", 15, 25); // Different result
 ```
-
-### Parallel Generation
-
-```rust
-use random_access_rng::RandomAccessRNG;
-use std::thread;
-
-fn generate_chunk_parallel(world_seed: &str, chunk_id: u64) -> Vec<u64> {
-    let mut rng = RandomAccessRNG::new(world_seed);
-    
-    // Jump to the start of this chunk
-    rng.seek_u64(chunk_id * 1000);
-    
-    // Generate 1000 random numbers for this chunk
-    (0..1000).map(|_| rng.next_u64()).collect()
-}
-
-// Generate chunks in parallel
-let handles: Vec<_> = (0..4)
-    .map(|chunk_id| {
-        thread::spawn(move || {
-            generate_chunk_parallel("world_seed", chunk_id)
-        })
-    })
-    .collect();
-
-let chunks: Vec<Vec<u64>> = handles
-    .into_iter()
-    .map(|h| h.join().unwrap())
-    .collect();
-```
-
 ### Game Development
 
 ```rust
@@ -173,6 +142,9 @@ let value_at_1000 = rng.seek_u64(1000);
 
 // Jump to position 5000
 let value_at_5000 = rng.seek_u64(5000);
+
+// Jump to back position 0
+let value_at_5000 = rng.seek_u64(0);
 ```
 
 ### Path-Based Seeding
@@ -203,7 +175,7 @@ This RNG is designed for speed and uses the XXH3 hash function, which is:
 - Game development
 - Any application requiring deterministic randomness
 
-For security-sensitive applications, use a cryptographically secure RNG.
+For security-sensitive applications, use a cryptographically secure RNG marked by the [CryptoRng](https://docs.rs/rand_core/latest/rand_core/trait.CryptoRng.html) trait.
 
 ## Installation
 
@@ -217,7 +189,6 @@ random_access_rng = "0.1.0"
 ## Documentation
 
 - [API Documentation](https://docs.rs/random_access_rng)
-- [Examples](https://github.com/yourusername/random_access_rng/tree/main/examples)
 
 ## License
 

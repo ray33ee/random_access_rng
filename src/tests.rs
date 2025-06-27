@@ -368,6 +368,23 @@ mod difference_tests {
 
     }
 
+    #[test]
+    fn test_cousins() {
+
+        let master_seed = 123456u64;
+
+        let parent = RandomAccessRNG::new(master_seed);
+
+        let mut childab = parent.get("a").get("b");
+
+        let mut childba = parent.get("b").get("a");
+
+        for _ in 0..1000 {
+            assert_ne!(childab.next_u64(), childba.next_u64());
+        }
+
+    }
+
 
 }
 

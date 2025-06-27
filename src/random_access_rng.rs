@@ -10,7 +10,7 @@ fn xxh3_integer_hash(n: u128) -> u128 {
 /// A deterministic random number generator that supports random access and hierarchical seeding.
 /// 
 /// This RNG uses fast XXH3 hashing to generate deterministic random numbers from any seed that
-/// implements the `Hash` trait. It supports creating child RNGs derived from parent seeds.
+/// implements the [`Hash`] trait. It supports creating child RNGs derived from parent seeds.
 /// 
 /// # Key Features
 /// 
@@ -18,7 +18,7 @@ fn xxh3_integer_hash(n: u128) -> u128 {
 /// - **Random Access**: Can seek to any position without generating intermediate values
 /// - **Hierarchical**: Can create child RNGs with different seeds
 /// - **Path-based**: Supports creating RNGs from file system-like paths
-/// - **Standard Compatible**: Implements `RngCore` and `SeedableRng` traits
+/// - **Standard Compatible**: Implements [`RngCore`] and [`SeedableRng`] traits
 /// - **Portable**: Does not rely on implementation or OS
 /// - **Reproducibility**: Seeding will never change between versions
 /// - **Seek**: Efficiently seek to the nth random number in a sequence instead of having to calculate all n values.
@@ -82,10 +82,10 @@ fn xxh3_integer_hash(n: u128) -> u128 {
 /// ```
 /// 
 /// **Note**: This RNG is NOT cryptographically secure. Use a cryptographically secure
-/// RNG (marked with the `CryptoRng` trait) for security-sensitive applications.
+/// RNG (marked with the [`CryptoRng`](rand_core::CryptoRng) trait) for security-sensitive applications.
 #[derive(Clone)]
 pub struct RandomAccessRNG {
-    seed: Xxh3,
+    hasher: Xxh3,
     index: u64,
 }
 
@@ -96,18 +96,14 @@ impl RandomAccessRNG {
         seed.hash(& mut xxh3);
 
         Self {
-            seed: xxh3,
+            hasher: xxh3,
             index: 0,
         }
     }
 
-    /// Generate a new `RandomAccessRNG` from a seed.
+    /// Generate a new [`RandomAccessRNG`] from a seed.
     /// 
-    /// The seed can be any type that implements the `Hash` trait, including:
-    /// - Primitive types: `u32`, `i64`, `f64`, etc.
-    /// - Strings: `&str`, `String`
-    /// - Collections: `Vec<T>`, `[T; N]` where `T: Hash`
-    /// - Custom types that implement `Hash`
+    /// The seed can be any type that implements the [`Hash`] trait.
     /// 
     /// # Examples
     /// 
@@ -191,12 +187,12 @@ impl RandomAccessRNG {
     /// - **Testing**: Create independent RNGs for different test scenarios
     /// - **Simulation**: Separate RNGs for different simulation components
     pub fn get<H: Hash>(&self, key: H) -> Self {
-        Self::new_helper(self.seed.clone(), key)
+        Self::new_helper(self.hasher.clone(), key)
     }
 
     /// Create a descendant RNG by applying multiple keys in sequence.
     /// 
-    /// This is equivalent to calling `get()` multiple times in sequence.
+    /// This is equivalent to calling [`get`](RandomAccessRNG::get) multiple times in sequence.
     /// The keys are applied in the order they appear in the iterator.
     /// 
     /// # Examples
@@ -218,14 +214,14 @@ impl RandomAccessRNG {
     /// ```
     ///
     pub fn descendant<'a, H: Hash + 'a + ?Sized, I: IntoIterator<Item = & 'a H>>(&self, keys: I) -> Self {
-        let mut h = self.seed.clone();
+        let mut h = self.hasher.clone();
 
         for key in keys {
             key.hash(&mut h);
         }
 
         Self {
-            seed: h,
+            hasher: h,
             index: 0,
         }
     }
@@ -289,7 +285,7 @@ impl RandomAccessRNG {
     /// Internal helper used in `seek_u64` and `next_u64`
     fn next(& mut self) -> u128 {
         //Simple way to generate next random number by combining self.seed and self.index
-        let result = xxh3_integer_hash(self.seed.digest128() ^ self.index as u128);
+        let result = xxh3_integer_hash(self.hasher.digest128() ^ self.index as u128);
 
         self.index += 1;
 
@@ -299,7 +295,7 @@ impl RandomAccessRNG {
     /// Seek to a specific position in the random number sequence.
     /// 
     /// This method allows you to jump directly to any position in the sequence
-    /// without having to repeatedly call `next_u64()`.
+    /// without having to repeatedly call [`next_u64`](RandomAccessRNG::next_u64).
     /// 
     /// # Examples
     /// 

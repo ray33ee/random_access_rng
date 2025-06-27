@@ -5,7 +5,7 @@
 //! - **Hierarchical seeding**: Create child RNGs with different seeds
 //! - **Random access**: Jump to any position in the sequence without generating intermediate values
 //! - **Path-based seeding**: Use file system-like paths to create RNG hierarchies
-//! - **Standard compatibility**: Implements `RngCore` and `SeedableRng` traits
+//! - **Standard compatibility**: Implements [`RngCore`](rand_core::RngCore) and [`SeedableRng`](rand_core::SeedableRng) traits
 //! 
 //! # Quick Start
 //! 
@@ -106,7 +106,7 @@
 //! - Simulation and testing
 //! - Any application requiring deterministic randomness
 //! 
-//! For security-sensitive applications, use a cryptographically secure RNGs look specifically for RNGs that implement the `CryptoRng` trait.
+//! For security-sensitive applications, use a cryptographically secure RNGs look specifically for RNGs that implement the [`CryptoRng`](rand_core::CryptoRng) trait.
 //! 
 //! # Examples
 //! 
