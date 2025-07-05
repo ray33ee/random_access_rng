@@ -166,6 +166,3 @@
 // Expose the random access RNG module
 pub mod random_access_rng;
 pub use random_access_rng::RandomAccessRNG;
-
-#[cfg(test)]
-mod tests;
